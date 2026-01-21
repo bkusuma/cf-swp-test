@@ -34,7 +34,7 @@
   ],
   
   // Node.js compatibility mode
-  "node_compat": true,
+  "nodejs_compat": true,
   
   // Build configuration
   "build": {
