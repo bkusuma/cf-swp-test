@@ -10,8 +10,7 @@
 
 {
   // Cloudflare Workers configuration
-  // "name": "cf-swp-test",
-  "name": "worker-name",
+  "name": "cf-swp-test",
   "main": "api/index.js",
   "compatibility_date": "2024-09-23",  // Enables automatic node: prefix for built-ins
   
