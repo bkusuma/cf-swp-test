@@ -1,6 +1,8 @@
-const sqlite3 = require('sqlite3').verbose();
-const fs = require('fs').promises;
-const { S3Client, GetObjectCommand, PutObjectCommand } = require('@aws-sdk/client-s3');
+import sqlite3 from 'sqlite3';
+import { promises as fs } from 'node:fs';
+import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
+
+const sqlite3Verbose = sqlite3.verbose();
 
 const ETAG_CACHE = '/tmp/etag.txt';
 let sqliteFilePath = '/tmp/wp-sqlite-s3.sqlite';
@@ -12,21 +14,21 @@ let client;
 let etag;
 let _config;
 
-exports.name = 'ServerlessWP sqlite s3';
+export const name = 'ServerlessWP sqlite s3';
 
-exports.config = function(config) {
-    _config = config;
-    if (config.S3Client) {
+export function config(configObj) {
+    _config = configObj;
+    if (configObj.S3Client) {
         // Cloudflare workaround for https://www.cloudflarestatus.com/incidents/t5nrjmpxc1cj
-        if (config.S3Client.endpoint && config.S3Client.endpoint.includes('cloudflarestorage.com')) {
-            config.S3Client.requestChecksumCalculation = "WHEN_REQUIRED";
-            config.S3Client.responseChecksumValidation = "WHEN_REQUIRED";
+        if (configObj.S3Client.endpoint && configObj.S3Client.endpoint.includes('cloudflarestorage.com')) {
+            configObj.S3Client.requestChecksumCalculation = "WHEN_REQUIRED";
+            configObj.S3Client.responseChecksumValidation = "WHEN_REQUIRED";
         }
-        client = new S3Client(config.S3Client);
+        client = new S3Client(configObj.S3Client);
     }
 }
 
-exports.preRequest = async function(event) {
+export async function preRequest(event) {
     if (!_config?.bucket) {
         throw new Error("S3 bucket is required");
     }
@@ -55,7 +57,7 @@ exports.preRequest = async function(event) {
 
         if (response) {
             await fs.writeFile(sqliteFilePath, response.Body);
-            db = new sqlite3.Database(sqliteFilePath);
+            db = new sqlite3Verbose.Database(sqliteFilePath);
             dataVersion = await getDataVersion();
             await setEtag(response.ETag);
         }
@@ -67,7 +69,7 @@ exports.preRequest = async function(event) {
     catch (err) {
         if (err.$metadata && err.$metadata.httpStatusCode === 304) {
             // No need to download, just use existing file
-            db = new sqlite3.Database(sqliteFilePath);
+            db = new sqlite3Verbose.Database(sqliteFilePath);
             dataVersion = await getDataVersion();
         }
         else if (err.$metadata?.httpStatusCode === 403) {
@@ -90,13 +92,13 @@ exports.preRequest = async function(event) {
     }
 }
 
-exports.postRequest = async function(event, response) {
+export async function postRequest(event, response) {
     try {
         // If db wasn't initialized but file exists, this is a new database
         const dbExists = await exists(sqliteFilePath);
         if (!db) {
             if (dbExists) {
-                db = new sqlite3.Database(sqliteFilePath);
+                db = new sqlite3Verbose.Database(sqliteFilePath);
                 dataVersion = null;
             } else {
                 return;
@@ -152,7 +154,7 @@ exports.postRequest = async function(event, response) {
     }
 }
 
-exports.branchNameToS3file = function(branch) {
+export function branchNameToS3file(branch) {
     return encodeURIComponent(branch);
 }
 
@@ -217,7 +219,7 @@ async function exists(path) {
 
 // Put the sqlite db class in place if not already there.
 // Paths should reference where they've been setup in /tmp
-exports.prepPlugin = async function (wpContentPath, sqlitePluginPath) {
+export async function prepPlugin(wpContentPath, sqlitePluginPath) {
     if (!init) {
         try {
             let oldPath = sqlitePluginPath + '/db.copy';
@@ -234,3 +236,13 @@ exports.prepPlugin = async function (wpContentPath, sqlitePluginPath) {
         }
     }
 }
+
+// Default export for compatibility
+export default {
+    name,
+    config,
+    preRequest,
+    postRequest,
+    branchNameToS3file,
+    prepPlugin
+};
