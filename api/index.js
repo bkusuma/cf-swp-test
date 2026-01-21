@@ -1,7 +1,7 @@
 import serverlesswp from 'serverlesswp';
 import { validate } from '../util/install.js';
 import { setup } from '../util/directory.js';
-import sqliteS3 from '../util/sqliteS3.js';
+import * as sqliteS3 from '../util/sqliteS3.js';
 import { register } from '../util/goldilock.js';
 
 const pathToWP = '/tmp/wp';
@@ -15,7 +15,7 @@ if (process.env['SQLITE_S3_BUCKET'] || process.env['SERVERLESSWP_DATA_SECRET']) 
     serverlesswp.registerPlugin(sqliteS3);
 }
 
-// ES Module format export for Cloudflare Workers
+// ES Module format export for Cloudflare Workers - THIS IS CRITICAL
 export default {
     async fetch(request, env, ctx) {
         // Convert Cloudflare Request to Lambda-style event object
@@ -30,7 +30,6 @@ export default {
                 : null,
             isBase64Encoded: false,
             rawUrl: request.url,
-            // Add Cloudflare-specific properties
             cf: request.cf,
         };
 
@@ -86,7 +85,6 @@ export default {
         }
 
         // Make environment variables available to process.env for compatibility
-        // This allows the existing code to work without major changes
         Object.assign(process.env, env);
 
         // Send the request to the serverlesswp library
