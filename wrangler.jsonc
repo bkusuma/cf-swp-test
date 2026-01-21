@@ -4,11 +4,6 @@
   "main": "api/index.js",
   "compatibility_date": "2024-09-23",
   
-  // Worker settings
-  "limits": {
-    "cpu_ms": 50000
-  },
-  
   // Static assets configuration
   "assets": {
     "directory": "./wp",
@@ -25,7 +20,7 @@
     "HOST": "gateway01.your-region.prod.aws.tidbcloud.com"
   },
   
-  // Compatibility flags - ONLY nodejs_compat, no node_compat
+  // Compatibility flags
   "compatibility_flags": [
     "nodejs_compat"
   ],
