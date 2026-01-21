@@ -10,9 +10,10 @@
 
 {
   // Cloudflare Workers configuration
-  "name": "wordpress-worker",
+  // "name": "cf-swp-test",
+  "name": "worker-name",
   "main": "api/index.js",
-  "compatibility_date": "2024-01-01",
+  "compatibility_date": "2024-09-23",  // Enables automatic node: prefix for built-ins
   
   // Worker settings
   "limits": {
@@ -20,32 +21,20 @@
   },
   
   // Static assets configuration
-  // All static files from wp/ directory will be served
   "assets": {
     "directory": "./wp",
     "binding": "ASSETS",
-    // Cache static assets for 10 days (864000 seconds)
     "html_handling": "none",
     "not_found_handling": "404-page"
   },
   
-  // Environment variables (if needed)
-  "vars": {
-    "NODEJS_AWS_HANDLER_NAME": "handler"
-  },
-  
-  // Routes - handles all incoming requests
-  "routes": [
-    {
-      "pattern": "*",
-      "zone_name": "your-domain.com"  // Replace with your actual domain
-    }
-  ],
-  
-  // Compatibility flags for Node.js compatibility
+  // Compatibility flags for Node.js
   "compatibility_flags": [
     "nodejs_compat"
   ],
+  
+  // Node.js compatibility mode
+  "node_compat": true,
   
   // Build configuration
   "build": {
