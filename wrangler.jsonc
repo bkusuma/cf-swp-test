@@ -1,13 +1,3 @@
-/*
-{
-  "name": "worker-name",
-  "compatibility_date": "2026-01-21",
-  "assets": {
-    "directory": "./dist"
-  }
-}
-*/
-
 {
   // Cloudflare Workers configuration
   "name": "cf-swp-test",
@@ -30,20 +20,15 @@
   // Environment variables (non-sensitive)
   "vars": {
     "NODEJS_AWS_HANDLER_NAME": "handler",
-    "DATABASE": "wordpress",  // Your TiDB database name
-    "USERNAME": "your_tidb_username",  // Your TiDB username
-    "HOST": "gateway01.your-region.prod.aws.tidbcloud.com",  // Your TiDB host
-    // Add these if using SQLite + S3 instead:
-    // "SQLITE_S3_BUCKET": "your-bucket-name",
-    // "SQLITE_S3_REGION": "auto"  // or your R2/S3 region
+    "DATABASE": "wordpress",
+    "USERNAME": "your_tidb_username",
+    "HOST": "gateway01.your-region.prod.aws.tidbcloud.com"
   },
   
-  // Compatibility flags
+  // Compatibility flags - ONLY nodejs_compat, no node_compat
   "compatibility_flags": [
     "nodejs_compat"
   ],
-  
-  "node_compat": true,
   
   // Build configuration
   "build": {
