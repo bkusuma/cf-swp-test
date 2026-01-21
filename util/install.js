@@ -1,8 +1,8 @@
-exports.validate = function(response) {
+export function validate(response) {
   let hasSqliteS3 = false;
   let hasSQL = false;
-  let platform = 'Cloudflare Workers';
-  let dashboardLink = 'https://dash.cloudflare.com';
+  let platform = 'AWS';
+  let dashboardLink;
 
   if (process.env['SQLITE_S3_BUCKET'] || process.env['SERVERLESSWP_DATA_SECRET']) {
     hasSqliteS3 = true;
@@ -12,7 +12,6 @@ exports.validate = function(response) {
     hasSQL = true;
   }
 
-  // Detect platform
   if (process.env['SITE_NAME']) {
     platform = 'Netlify';
     dashboardLink = `https://app.netlify.com/sites/${process.env['SITE_NAME']}/settings/env`;
@@ -24,6 +23,9 @@ exports.validate = function(response) {
   else if (process.env['CF_PAGES'] || process.env['CLOUDFLARE_WORKERS']) {
     platform = 'Cloudflare Workers';
     dashboardLink = 'https://dash.cloudflare.com';
+  }
+  else {
+    dashboardLink = 'https://console.aws.amazon.com/console/home';
   }
 
   if (!hasSQL && !hasSqliteS3) {
