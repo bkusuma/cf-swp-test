@@ -1,7 +1,7 @@
-const fs = require('fs');
-const execSync = require("child_process").execSync;
+import fs from 'node:fs';
+import { execSync } from 'node:child_process';
 
-exports.setup = function() {
+export function setup() {
     if (!fs.existsSync('/tmp/wp')) {
         fs.mkdirSync('/tmp/wp');
         try {
