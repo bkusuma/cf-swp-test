@@ -1,5 +1,4 @@
-
-exports.register = async function (bucket, secret) {
+export async function register(bucket, secret) {
   const response = await fetch('https://data.serverlesswp.com/auto-register', {
     method: 'POST',
     headers: {
