@@ -1,8 +1,8 @@
 exports.validate = function(response) {
   let hasSqliteS3 = false;
   let hasSQL = false;
-  let platform = 'AWS';
-  let dashboardLink;
+  let platform = 'Cloudflare Workers';
+  let dashboardLink = 'https://dash.cloudflare.com';
 
   if (process.env['SQLITE_S3_BUCKET'] || process.env['SERVERLESSWP_DATA_SECRET']) {
     hasSqliteS3 = true;
@@ -12,6 +12,7 @@ exports.validate = function(response) {
     hasSQL = true;
   }
 
+  // Detect platform
   if (process.env['SITE_NAME']) {
     platform = 'Netlify';
     dashboardLink = `https://app.netlify.com/sites/${process.env['SITE_NAME']}/settings/env`;
@@ -20,8 +21,9 @@ exports.validate = function(response) {
     platform = 'Vercel';
     dashboardLink = 'https://vercel.com/dashboard';
   }
-  else {
-    dashboardLink = 'https://console.aws.amazon.com/console/home';
+  else if (process.env['CF_PAGES'] || process.env['CLOUDFLARE_WORKERS']) {
+    platform = 'Cloudflare Workers';
+    dashboardLink = 'https://dash.cloudflare.com';
   }
 
   if (!hasSQL && !hasSqliteS3) {
@@ -75,14 +77,19 @@ return `<!doctype html>
         <li>${data.password} PASSWORD (the password to connect to the database)</li>
         <li>${data.host} HOST (the hostname to connect to the database)</li>
       </ul>
+      ${data.platform === 'Cloudflare Workers' ? `
+      <p>For Cloudflare Workers, set non-sensitive variables in <code>wrangler.jsonc</code> under "vars", and use <code>wrangler secret put PASSWORD</code> for sensitive values.</p>
+      <p>Go to your project's <a href="${data.dashboardLink}" target="_blank">dashboard</a> to manage environment variables. <strong>Then redeploy with <code>npx wrangler deploy</code>!</strong></p>
+      ` : `
       <p>Go to your project's <a href="${data.dashboardLink}" target="_blank">dashboard</a> at ${data.platform} to make sure these values for your database details are entered. <strong>Then remember to re-deploy your project!</strong></p>
+      `}
       <p>Having trouble? Send a <a href="https://serverlesswp.com/chat" target="_blank">chat message</a>.</p>
       <br>
       <br>
       <article><details>
-        <summary>SQLite + S3 database alternative</summary>
+        <summary>SQLite + S3/R2 database alternative</summary>
         <p>Want to try WordPress without a database server?</p>
-        <p>A super low cost and low maintenance way to handle WordPress data is to combine SQLite as a database with S3 storage. ServerlessWP does all of the hard work to keep the data in-sync.<p>
+        <p>A super low cost and low maintenance way to handle WordPress data is to combine SQLite as a database with ${data.platform === 'Cloudflare Workers' ? 'R2' : 'S3'} storage. ServerlessWP does all of the hard work to keep the data in-sync.<p>
         <p>It's great for blogs, portfolios, and documentation sites.</p>
         <p>Check out the project <a href="https://github.com/mitchmac/serverlesswp/?tab=readme-ov-file#sqlite--s3-database-option" target="_blank">readme</a> for more details.</p>
         <p>The environment variables to try this approach should be:</p>
@@ -90,7 +97,7 @@ return `<!doctype html>
           <li>${data.sqliteBucket} SQLITE_S3_BUCKET (bucket name you created)</li>
           <li>${data.sqliteKey} SQLITE_S3_API_KEY (key to access the bucket)</li>
           <li>${data.sqliteSecret} SQLITE_S3_API_SECRET (key to access the bucket)</li>
-          <li>${data.sqliteRegion} SQLITE_S3_REGION (region where the bucket lives - create it near your serverless functions)</li>
+          <li>${data.sqliteRegion} SQLITE_S3_REGION ${data.platform === 'Cloudflare Workers' ? '(use "auto" for R2)' : '(region where the bucket lives - create it near your serverless functions)'}</li>
         </ul>
       </details></article>
       <br>
